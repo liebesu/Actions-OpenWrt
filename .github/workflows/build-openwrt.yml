@@ -51,7 +51,9 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-
+    - name: 更新
+      run: cd openwrt && git pull
+      
     - name: 下载软件更新
       run: cd openwrt && ./scripts/feeds update -a
 
