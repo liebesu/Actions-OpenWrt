@@ -86,13 +86,13 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        #make -j$(nproc)
+        make -j$(nproc)
 
-    - name: 单线程编译
-      if: failure()
-      run: |
-        cd openwrt
-        make -j1 V=s
+    #- name: 单线程编译
+     # if: failure()
+      #run: |
+       # cd openwrt
+        #make -j1 V=s
     - name: 上载bin目录
       uses: actions/upload-artifact@master
       if: always()
