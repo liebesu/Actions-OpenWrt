@@ -51,6 +51,7 @@ jobs:
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+      
     - name: 更新
       run: cd openwrt && git pull
       
@@ -87,12 +88,11 @@ jobs:
         echo -e "$(nproc) thread compile"
         #make -j$(nproc)
 
-    #- name: 单线程编译
-     # run: |
-      
-#  cd openwrt
- #       make -j1 V=s
-        
+    - name: 单线程编译
+      if: failure()
+      run: |
+        cd openwrt
+        make -j1 V=s
     - name: 上载bin目录
       uses: actions/upload-artifact@master
       if: always()
