@@ -1,20 +1,12 @@
 #=================================================
-##注意，注意，注意，用本教程得到的my.files 会保存你的宽带账号、密码，WIFI等个人信息，必须把仓库设为个人，不能是公开！不能是公开！不能是公开！
-##注意，注意，注意，用本教程得到的my.files 会保存你的宽带账号、密码，WIFI等个人信息，必须把仓库设为个人，不能是公开！不能是公开！不能是公开！
-##注意，注意，注意，用本教程得到的my.files 会保存你的宽带账号、密码，WIFI等个人信息，必须把仓库设为个人，不能是公开！不能是公开！不能是公开！
-#
-#
-##第一步：先按大神的教程定制你需要的固件，在此文件内填入按教程得到seed.config内容，生成定制固件。
-##第二步，路由器刷固件，然后设置好各项参数WFI,账号之类的，重启。（不要增加删除软件，要在第一步做好选择）
-##第三步：获取files文件，以K2为例：SSH进入路由器，输入：
-#####   find /overlay/upper -type f | xargs tar -cvpf /tmp/my.files
-#########说明 /overlay/upper 为固件的用户数据区，你设置路由器是更改过的文件都在这里
-##第四步：到 /tmp 目录下找到 my.files 文件，把该文件上传至本项目的根目录（和.config相同目录）##
-##第五步：再次打开 my.config 在最后回车加空行，就能保存了。
-##第六步：等固件生成，路由器刷最后得到的固件。现在你恢复出厂，之前设定好的参数一样还在。
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: P3TERX
+# Blog: https://p3terx.com
 #=================================================
 
-name: my_LEDE云编译
+name: LEDE云编译(all插件)多线程-liebesu
 
 on: 
   release:
@@ -23,16 +15,16 @@ on:
     branches: 
       - master
     paths:
-      - 'my.config'
+      - 'all.config'
 #  schedule:
 #    - cron: 0 8 * * 5
-#  watch:
-#    types: [started]
+  watch:
+    types: [started]
 
 jobs:
   build:
     runs-on: ubuntu-18.04
-
+    if: github.event.repository.owner.id == github.event.sender.id
     steps:
     - name: 查看
       uses: actions/checkout@master
@@ -51,14 +43,18 @@ jobs:
         sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
-        curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
+        #curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
         sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
     - name: 克隆源代码
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
       run: git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-
+      
+    - name: 更新
+      run: cd openwrt && git pull
+      
     - name: 下载软件更新
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -67,36 +63,42 @@ jobs:
 
     - name: 加载自定义配置
       env:
-        CONFIG_FILE: 'my.config'
+        CONFIG_FILE: 'all.config'
+        DIY_SH: 'diy.sh'
       run: |
-        [ -e my.files ] && tar -xvf my.files && mv overlay/upper openwrt/files
+        [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x $DIY_SH
         cd openwrt
+        ../$DIY_SH
         make defconfig
-#    - name: SSH connection to Actions
-#      uses: P3TERX/debugger-action@master
+
+    #- name: SSH connection to Actions
+    #  uses: P3TERX/debugger-action@master
 
     - name: 下载包
       run: |
         cd openwrt && make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+
     - name: 多线程编译
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
         make -j$(nproc)
-    - name: 单线程编译
-      if: failure()
-      run: |
-        cd openwrt
-        make -j1 V=s
-#    - name: 上载bin目录
-#      uses: actions/upload-artifact@master
-#      if: always()
-#      with:
-#        name: OpenWrt_bin
-#        path: openwrt/bin
+
+    #- name: 单线程编译
+     # if: failure()
+      #run: |
+       # cd openwrt
+        #make -j1 V=s
+    - name: 上载bin目录
+      uses: actions/upload-artifact@master
+      if: always()
+      with:
+        name: OpenWrt_bin
+        path: openwrt/bin
 
     - name: 整理档案
       if: always()
@@ -104,9 +106,11 @@ jobs:
         cd openwrt/bin/targets/*/*
         rm -rf packages
         echo "::set-env name=FIRMWARE::$(pwd)"
+
     - name: 上载固件
       uses: actions/upload-artifact@master
       if: always()
       with:
         name: OpenWrt_firmware
         path: ${{ env.FIRMWARE }}
+        
