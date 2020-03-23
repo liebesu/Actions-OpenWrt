@@ -115,7 +115,7 @@ jobs:
         name: OpenWrt_firmware
         path: ${{ env.FIRMWARE }}
     - name: 报告电报
-      uses: screendriver/ifttt-action@v1
+    - uses: screendriver/ifttt-action@v1
       with:
        event: github_actions
        key: p96FfuW3aG5CdY2VXUIIczPoERN5si6-jzhd6T505IQ
