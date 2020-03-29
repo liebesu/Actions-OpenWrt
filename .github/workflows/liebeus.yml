@@ -97,7 +97,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: always()
       with:
-        name: OpenWrt_bin
+        name: OpenWrt_bin_liebesu
         path: openwrt/bin
 
     - name: 整理档案
@@ -111,7 +111,7 @@ jobs:
       uses: actions/upload-artifact@master
       if: always()
       with:
-        name: OpenWrt_firmware
+        name: OpenWrt_firmware_liebesu
         path: ${{ env.FIRMWARE }}
 
     - name: 报告电报
