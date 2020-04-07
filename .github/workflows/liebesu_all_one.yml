@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: LEDE云编译(all插件)多线程-liebesu
+name: LEDE云编译(all插件)单线程-liebesu
 
 on: 
   release:
