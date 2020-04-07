@@ -6,7 +6,7 @@
 # Blog: https://p3terx.com
 #=================================================
 
-name: LEDE云编译多线程-liebesu
+name: LEDE云编译单线程-liebesu
 
 on: 
   release:
@@ -82,17 +82,17 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 多线程编译
+    #- name: 多线程编译
+     # run: |
+      #  cd openwrt
+       # echo -e "$(nproc) thread compile"
+        #make -j$(nproc)
+
+    - name: 单线程编译
       run: |
         cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc)
-
-    #- name: 单线程编译
-     # if: failure()
-      #run: |
-       # cd openwrt
-        #make -j1 V=s
+        make -j1 V=s
+        
     - name: 上载bin目录
       uses: actions/upload-artifact@master
       if: always()
