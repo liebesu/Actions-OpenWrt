@@ -55,6 +55,9 @@ jobs:
     - name: 更新
       run: cd openwrt && git pull
       
+    - name: SSR
+      run: cd openwrt && sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
+      
     - name: 下载软件更新
       run: cd openwrt && ./scripts/feeds update -a
 
