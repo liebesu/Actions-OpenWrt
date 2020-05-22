@@ -73,7 +73,9 @@ jobs:
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_SH
         cd openwrt
+        ./scripts/feeds update -a && ./scripts/feeds install -a
         ../$DIY_SH
+        
         make defconfig
 
     #- name: SSH connection to Actions
