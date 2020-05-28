@@ -7,7 +7,8 @@
 #=================================================
 # Modify default IP
 #sed -i 's/192.168.1.1/192.168.50.5/g' package/base-files/files/bin/config_generate
-mkdir package/base-files/files/config
-echo 0xDEADBEEF > package/base-files/files/config/google_fu_mode
-echo "src-git helloworld https://github.com/fw876/helloworld" >> feeds.conf.default
-./scripts/feeds update -a && ./scripts/feeds install -a
+# fw876/helloworld
+sed -i 's/^#\(.*helloworld\)/\1/' feeds.conf.default
+
+# Lienol/openwrt-package
+sed -i '$a src-git lienol https://github.com/Lancenas/lienol-openwrt-package.git' feeds.conf.default
